@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mentore</title>
+
+  <!-- CSS -->
+  <style>
+    /* Estilos Generales y Reset */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url("bos.jpg");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      padding-top: 90px;
+    }
+    
+    /* Header Fijo */
+    #header-principal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(173, 216, 230, 0.9); 
+        backdrop-filter: blur(5px);
+        padding: 10px 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .header-logo-container { display: flex; align-items: center; gap: 15px; }
+    .header-logo { height: 45px; width: auto; }
+    .header-titulo { font-size: 1.5rem; font-weight: bold; color: #0f4680; }
+    
+    .boton-encuesta {
+        background-color: #28a745;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        display: none; /* Oculto por defecto */
+    }
+    .boton-encuesta:hover { background-color: #218838; }
+    
+    .header-botones-container { 
+        display: none;
+        align-items: center; 
+        gap: 10px; 
+    }
+    
+    .header-boton {
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+    .header-boton:hover { background-color: #0056b3; }
+    .boton-inicio { background-color: #6c757d; }
+    .boton-inicio:hover { background-color: #5a6268; }
+
+    /* Contenedor principal de cada pantalla */
+    .pantalla {
+      display: none;
+      width: 100%;
+      max-width: 850px; 
+      background-color: rgba(183, 221, 246, 0.674); 
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      position: relative;
+    }
+    .pantalla.activa { display: block; opacity: 1; }
+
+    /* Tipografía */
+    h2 { font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 20px; }
+    h3 { font-size: 1.4rem; color: #333; margin-bottom: 15px; border-bottom: 2px solid #007BFF; padding-bottom: 5px; display: inline-block; }
+    p { font-size: 1.1rem; color: #555; margin-bottom: 20px; line-height: 1.6; }
+    ul { list-style-type: disc; padding-left: 25px; margin-bottom: 30px; text-align: left; }
+    ul li { font-size: 1rem; margin-bottom: 10px; color: #444; }
+    a { color: #0f4680; text-decoration: none; font-weight: bold; }
+    a:hover { text-decoration: underline; }
+
+    /* Imágenes y GIFs */
+    .logo { width: 150px; margin: 0 auto 20px; }
+    img.gif-ejercicio, #imagenEjercicio { width: 100%; max-width: 400px; height: auto; max-height: 250px; object-fit: contain; margin: 20px auto; border-radius: 10px; }
+
+    /* Botones y Entradas de Texto */
+    .boton, button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      width: 100%;
+      max-width: 300px; 
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .boton:hover, button:hover { background-color: #0056b3; transform: scale(1.03); }
+    .boton-regresar { background-color: #6c757d; }
+    .boton-regresar:hover { background-color: #5a6268; }
+    input[type="email"], input[type="password"] { width: 100%; max-width: 350px; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
+    
+    /* --- ESTILO PARA MENSAJE DE ERROR/OBLIGATORIO --- */
+    .error { 
+        color: red; 
+        font-size: 0.9rem; 
+        margin: -5px auto 10px auto; 
+        display: none; /* Oculto por defecto */
+        text-align: left; 
+        max-width: 350px; 
+    }
+    /* --- FIN DE ESTILO --- */
+
+    /* Estilos específicos de pantallas */
+    #pantalla4 .nivel-btn { display: block; width: 100%; max-width: 350px; margin: 10px auto; background-color: #2254be; }
+    #pantalla4 .nivel-btn:hover { background-color: #2c58b0 !important; transform: scale(1.03); }
+    .barra-progreso { width: 100%; height: 8px; background-color: #ccc; margin-bottom: 20px; border-radius: 5px; overflow: hidden; }
+    .barra-progreso-inner { height: 100%; background-color: #007BFF; width: 0%; transition: width 0.4s ease; }
+    #pantalla5 .boton-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    #pantalla5 .boton { width: 45%; min-width: 120px; }
+    #botonAtras { background-color: #6c757d; }
+    #botonAtras:hover { background-color: #5a6268; }
+
+    /* Estilos Espacio Personal */
+    .progreso-container, .logros-container, .frase-container { background-color: rgba(255, 255, 255, 0.5); padding: 20px; margin: 20px auto; border-radius: 10px; max-width: 600px; }
+    .grid-logros { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-top: 15px; }
+    .logro-item { background: #fff; border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .logro-item.bloqueado { opacity: 0.5; background: #e0e0e0; }
+    .logro-icono { font-size: 2.5rem; }
+    .logro-nombre { font-size: 0.9rem; font-weight: bold; margin-top: 5px; color: #333; }
+    #fraseMotivacional { font-style: italic; font-size: 1.2rem; color: #0f4680; }
+    
+    /* Estilos Pantalla de Favoritos */
+    .favorito-item { background-color: rgba(255, 255, 255, 0.6); border-radius: 15px; padding: 20px; margin: 15px auto; max-width: 500px; text-align: left; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .favorito-item h4 { font-size: 1.3rem; color: #0f4680; margin-bottom: 8px; }
+    .favorito-item p { font-size: 1rem; margin-bottom: 15px; }
+    .favorito-botones { display: flex; gap: 10px; justify-content: flex-end; }
+    .favorito-botones button { width: auto; max-width: none; padding: 8px 15px; font-size: 0.9rem; }
+    .boton-eliminar-fav { background-color: #dc3545; }
+    .boton-eliminar-fav:hover { background-color: #c82333; }
+    #mensajeSinFavoritos { font-style: italic; color: #666; }
+
+    /* Estilo Notificación */
+    .notificacion {
+        background-color: #d9534f; color: white; padding: 12px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 450px; z-index: 10;
+        opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    
+    /* Estilos Pantalla de Encuesta */
+    #preguntaEncuesta { font-size: 1.3rem; font-weight: bold; color: #333; margin-bottom: 25px; }
+    .encuesta-opciones-container { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+    .encuesta-opcion-btn { max-width: 400px; background-color: #17a2b8; }
+    .encuesta-opcion-btn:hover { background-color: #138496; }
+    
+    /* Estilo Pantalla de Recomendación */
+    #mensajeRecomendacion { font-size: 1.2rem; font-weight: bold; color: #0f4680; margin-top: 20px; margin-bottom: 30px; }
+
+    /* Media Queries */
+    @media (max-width: 768px) { body { padding: 15px; padding-top: 80px; } .pantalla { padding: 25px; } h2 { font-size: 1.8rem; } p { font-size: 1rem; } .header-titulo { font-size: 1.3rem; } .header-logo { height: 40px; } .header-boton, .boton-encuesta { padding: 8px 14px; font-size: 0.8rem; } }
+    @media (max-width: 480px) { body { padding: 10px; padding-top: 75px; } .pantalla { padding: 20px 15px; } h2 { font-size: 1.5rem; } p { font-size: 0.95rem; } .boton, button, input[type="email"], input[type="password"] { font-size: 0.9rem; } .logo { width: 120px; } #pantalla5 .boton { width: 100%; margin: 5px 0; } .header-titulo { display: none; } .header-logo-container { gap: 10px; } .header-boton, .boton-encuesta { padding: 8px 10px; font-size: 0.7rem; } .header-botones-container { gap: 5px; } }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header id="header-principal">
+    <div class="header-logo-container">
+        <img src="Captura de pantalla 2025-07-06 064303.png" class="header-logo" alt="Logo Mentore">
+        <span class="header-titulo">Mentore</span>
+        <button class="header-boton boton-encuesta" onclick="iniciarEncuesta()">Realizar Encuesta 📝</button>
+    </div>
+    <div class="header-botones-container">
+        <button class="header-boton boton-inicio" onclick="ir('1')">Inicio</button>
+        <button class="header-boton" onclick="verFavoritos()">Favoritos ⭐</button>
+        <button class="header-boton" onclick="verEspacioPersonal()">Mi Espacio Personal</button>
+    </div>
+  </header>
+  
+  <!-- PANTALLAS -->
+  
+  <div class="pantalla activa" id="pantalla1">
+    <img src="Captura de pantalla 2025-07-06 064303.png" class="logo" alt="Logo Mentore">
+    <h2>Su guía diaria para manejar el estrés y recuperar el equilibrio</h2>
+    <p>Comience hoy a cuidarse por dentro</p>
+    <button class="boton" onclick="ir('11')">Descubrir Mentore</button>
+  </div>
+   
+  <div class="pantalla" id="pantalla11">
+    <p>"En Mentore, su bienestar emocional y mental es lo más importante para nosotros..."</p>
+    <h2>Iniciar Sesión</h2>
+    <input type="email" id="nuevoCorreo" placeholder="Correo electrónico"><p id="errorNuevoCorreo" class="error">Obligatorio</p>
+    <input type="password" id="nuevaClave" placeholder="Contraseña"><p id="errorNuevaClave" class="error">Obligatorio</p>
+    <button class="boton" onclick="validarLogin()">Entrar</button>
+    <p style="margin-top: 20px; font-size: 1rem;">¿No tiene una cuenta? <a href="#" onclick="ir('3')">Regístrese aquí</a></p>
+  </div>
+
+  <div class="pantalla" id="pantalla3">
+    <h2>Registrar</h2>
+    <input type="email" id="correo" placeholder="Crear cuenta"><p id="errorCorreo" class="error">Obligatorio</p>
+    <input type="password" id="clave" placeholder="Crear contraseña"><p id="errorClave" class="error">Obligatorio</p>
+    <button class="boton" onclick="validarRegistro()">Entrar</button>
+    <p style="margin-top: 20px; font-size: 1rem;">¿Ya tiene cuenta? <a href="#" onclick="ir('11')">Inicie Sesión aquí</a></p>
+  </div>
+
+  <div class="pantalla" id="pantalla4">
+    <div class="barra-progreso"><div class="barra-progreso-inner"></div></div>
+    <h2>¿Qué nivel de estrés siente hoy?</h2>
+    <p>Seleccione el nivel que mejor represente cómo se siente.</p>
+    <button class="nivel-btn" onclick="seleccionarNivel(1)">1 🌿 Muy relajado</button>
+    <button class="nivel-btn" onclick="seleccionarNivel(2)">2 😌 Tranquilo</button>
+    <button class="nivel-btn" onclick="seleccionarNivel(3)">3 😐 Neutral</button>
+    <button class="nivel-btn" onclick="seleccionarNivel(4)">4 😣 Estresado</button>
+    <button class="nivel-btn" onclick="seleccionarNivel(5)">5 😵‍💫 Muy estresado</button>
+    <button class="boton boton-regresar" onclick="ir('11')">Regresar</button>
+  </div>
+
+  <div class="pantalla" id="pantalla5">
+    <div class="barra-progreso"><div class="barra-progreso-inner"></div></div>
+    <h2 id="tituloEjercicio"></h2>
+    <p id="descripcionEjercicio"></p>
+    <ul id="listaEjercicio"></ul>
+    <img id="imagenEjercicio" class="gif-ejercicio" src="" alt="Ejercicio">
+    <div id="notificacionFavoritos" class="notificacion"></div>
+    <div class="boton-container">
+      <button class="boton" id="botonFavorito" onclick="toggleFavorito()"></button>
+      <button class="boton" id="botonSiguiente" onclick="siguienteEjercicio()">Siguiente</button>
+      <button class="boton" id="botonAtras" onclick="anteriorEjercicio()">Atrás</button>
+    </div>
+  </div>
+
+  <div class="pantalla" id="pantalla10">
+    <h2>¿Cómo se siente ahora?</h2>
+    <p>Gracias por tomarse este tiempo para usted.<br>Si necesita ayuda, escríbanos.</p>
+    <p><strong>contacto@mentore.com</strong></p>
+    <p id="mensajeFinal" style="font-size: 1rem; color: #555;"></p>
+    <button class="boton" onclick="verEspacioPersonal()">Mi Espacio Personal</button>
+    <button class="boton" onclick="mostrarInformacion()">Más información</button>
+    <button class="boton" onclick="ir('1')">Volver al inicio</button>
+  </div>
+ 
+  <div class="pantalla" id="pantalla12">
+    <h2>Estrés en jóvenes universitarios</h2>
+    <p>El estrés en estudiantes universitarios es muy común debido a la carga académica, la presión social y la incertidumbre sobre el futuro.</p>
+    <ul>
+      <li><strong>Consecuencias:</strong> ansiedad, insomnio, bajo rendimiento.</li>
+      <li><strong>Recomendaciones:</strong> técnicas de respiración, pausas activas, organización del tiempo, apoyo emocional.</li>
+    </ul>
+    <p style="font-weight: bold;">El manejo del estrés es clave para el bienestar. Pequeños hábitos diarios pueden generar grandes cambios.</p>
+    <p>Mire este video útil: <a href="https://www.youtube.com/watch?v=_9Fp4G6_fB8" target="_blank">Ver video en YouTube</a></p>
+    <br><br>
+    <button class="boton" onclick="ir('10')">Volver</button>
+  </div>
+
+  <div class="pantalla" id="pantallaPersonal">
+    <h2>Mi Espacio Personal</h2>
+    <div class="progreso-container"><h3>Mi Progreso</h3><p>Sesiones de bienestar completadas: <strong id="sesionesContador">0</strong></p></div>
+    <div class="logros-container"><h3>Mis Logros</h3><div id="listaLogros" class="grid-logros"></div></div>
+    <div class="frase-container"><h3>Frase para usted</h3><p id="fraseMotivacional"></p></div>
+    <button class="boton" onclick="ir('4')">Nuevos ejercicios</button>
+    <button class="boton" onclick="ir('1')">Volver al inicio</button>
+  </div>
+  
+  <div class="pantalla" id="pantallaFavoritos">
+      <h2>Mis Ejercicios Favoritos</h2>
+      <p>Guarde hasta 3 ejercicios para acceder a ellos rápidamente.</p>
+      <div id="listaFavoritosContainer"></div>
+      <p id="mensajeSinFavoritos" style="display: none;">Aún no ha guardado ningún ejercicio favorito.</p>
+      <button class="boton" onclick="ir('4')">Ver todos los ejercicios</button>
+  </div>
+  
+  <div class="pantalla" id="pantallaEncuesta">
+      <h2>Encuesta de Bienestar</h2>
+      <p id="preguntaEncuesta"></p>
+      <div id="encuestaOpciones" class="encuesta-opciones-container"></div>
+      <button class="boton boton-regresar" onclick="ir('1')">Regresar al Inicio</button>
+  </div>
+  
+  <div class="pantalla" id="pantallaRecomendacion">
+      <h2>Hemos encontrado una recomendación para usted</h2>
+      <p id="mensajeRecomendacion"></p>
+      <button class="boton" onclick="accederAEjercicios()">Acceder a los Ejercicios</button>
+  </div>
+
+
+  <!-- JavaScript -->
+  <script>
+    const ejerciciosPorNivel = {
+        1: [ { titulo: "Ejercicio 1 - Respiración Profunda", descripcion: "Inhale y exhale lentamente para relajarse profundamente.", pasos: ["Busque un lugar comodo, siéntese cómodamente y cierre los ojos.", "Inhale por la nariz contando hasta 4.", "Sostenga el aire por 4 segundos.", "Exhale lentamente por la boca contando hasta 6.", "Repita este ciclo 5 veces."], imagen: "1 ejercicio del 1 nivel.gif", }, { titulo: "Ejercicio 2 - Estiramientos Suaves", descripcion: "Estire suavemente cuello, brazos y espalda.", pasos: ["Estire el cuello a la derecha (inhale contando hasta 5), vuelva al centro (exhale)", "Estire a la izquierda (inhale contando hasta 5), vuelva al centro (exhale).", "Rote los hombros hacia atrás 5 veces y luego hacia adelante 5 veces.", "Estire los brazos hacia arriba (inhale contando hasta 5) y bájelos lentamente (exhale).", "Repita todo 2 veces."], imagen: "9yOs.gif" }, { titulo: "Ejercicio 3 - Meditación Breve", descripcion: "Concéntrese en su respiración y deje que su mente se calme.", pasos: ["Siéntese cómodamente, especialmente con la espalda recta", "Cierre los ojos y enfóquese en su respiración natural.", "Si su mente se distrae o le llegan pensamientos, no pasa nada es normal, suavemente vuelva a concentrarse en su respiración.", "Haga esto durante 5 minutos.", "Al terminar, abra los ojos lentamente."], imagen: "giphy.gif" }, { titulo: "Ejercicio 4 - Paseo Consciente", descripcion: "Camine prestando atención a los sonidos y colores a su alrededor.", pasos: ["Camine despacio por la habitación, o si gusta por algun lugar que le parezca comodo.", "Fíjese en los colores, formas y objetos a su alrededor.", "Escuche con atención los sonidos suaves que pueda oír.", "Respire profundo y relajado mientras camina.", "Mantenga su atención en los detalles durante 5 minutos."], imagen: "caminata.gif" }, { titulo: "Ejercicio 5 - Diario de Gratitud", descripcion: "Anote 3 cosas por las que está agradecido hoy.", pasos: ["Piense en 3 cosas buenas que le pasaron hoy.", "Escríbalas en un cuaderno o en su teléfono, especialmente en un cuaderno.", "Reflexione sobre por qué se siente agradecido por ellas."], imagen: "diario.gif" }, ],
+        2: [ { titulo: "Ejercicio 1 - Visualización Positiva", descripcion: "Imagine una escena tranquila o un momento feliz para mantener su estado de calma.", pasos: ["Siéntese o recuéstese cómodamente y cierre los ojos.", "Imagine un lugar seguro y tranquilo donde se sienta feliz.", "Visualice con detalle los colores, sonidos y olores.", "Manténgase en esa imagen durante 5 minutos, respirando y exhalando calmadamente."], imagen: "pos.gif" }, { titulo: "Ejercicio 2 - Dibujar sin pensar", descripcion: "Relaje su mente dibujando lo que salga, sin juzgar ni planear.", pasos: ["Tome una hoja de papel y un lápiz.", "Relaje la mente y comience a hacer líneas o garabatos libres.", "Deje que su mano se mueva sin planificar el resultado.", "Continúe dibujando durante 5 minutos."], imagen: "dibujar.gif" }, { titulo: "Ejercicio 3 - Lectura Recreativa", descripcion: "Dedique unos minutos a leer algo que le guste.", pasos: ["Busque un libro o texto ligero que le guste (cuento, poema, artículo).", "Siéntese en un lugar tranquilo sin interrupciones.", "Lea con calma, sin prisa, disfrutando la lectura.", "Dedique al menos 5 minutos a esta actividad."], imagen: "lectura.gif" }, { titulo: "Ejercicio 4 - Liberación de Tensión", descripcion: "Libere la tensión acumulada de forma física.", pasos: ["Apriete una pelota anti estres o si no dispone puede hacerlo con una almohada o cojin apretando con las dos manos varias veces.", "Puede a su vez cerrar los ojos y respirar calmadamente.", "Hágalo durante 5 minutos para liberar la tensión del cuerpo."], imagen: "stress-ball.gif" }, { titulo: "Ejercicio 5 - Escucha Consciente de Música", descripcion: "Escuche una canción relajante y concéntrese solo en ella.", pasos: ["Elija una canción relajante.", "Póngase audífonos (de preferencia si los tiene) y cierre los ojos.", "Escuche con atención los sonidos e instrumentos.", "Sienta cómo su cuerpo reacciona al ritmo durante 5 minutos."], imagen: "escuchar música.gif" }, ],
+        3: [ { titulo: "Ejercicio 1 - Ordene su espacio", descripcion: "Organice un pequeño lugar a su alrededor para sentirse más en control.", pasos: ["Elija una zona pequeña: su escritorio, cama o mochila.", "Retire lo que no va ahí: basura, ropa, objetos fuera de lugar.", "Acomode lo demás de forma ordenada.", "Tomese el tiempo que necesite."], imagen: "cuarto.gif" }, { titulo: "Ejercicio 2 - Hidratación Consciente", descripcion: "Tome agua prestando atención a cada sensación.", pasos: ["Tome un vaso con agua y siéntalo en sus manos.", "Durante 1 minuto, beba lentamente, notando el sabor y la frescura.", "Agradezca mentalmente ese momento mientras respira con calma."], imagen: "tomar agua.gif" }, { titulo: "Ejercicio 3 - Juego de 5 sentidos", descripcion: "Conéctese con el momento presente usando sus 5 sentidos.", pasos: ["Nombre 5 cosas que ve a su alrededor.", "Identifique 4 cosas que puede tocar.", "Escuche 3 sonidos distintos.", "Reconozca 2 olores diferentes.", "Sienta 1 sabor en su boca."], imagen: "contar.gif" }, { titulo: "Ejercicio 4 - Observar un Objeto Común", descripcion: "Entrene su atención con algo simple y cotidiano.", pasos: ["Elija un objeto simple (una pluma, una taza, etc).", "Obsérvelo en silencio durante 2 minutos.", "Fíjese en su color, forma, textura y detalles pequeños, no lo juzgue, solo mírelo con atención.", "Vuelva a repetirlo las veces que sea necesario para fortalecer su atención. "], imagen: "ver con atención.gif" }, { titulo: "Ejercicio 5 - Pausa Digital", descripcion: "Tómese un breve descanso de pantallas.", pasos: ["Apague o silencie su celular por 10 minutos (luego de seguir todos los pasos).", "No use ninguna pantalla (computadora, TV).", "Puede mirar por la ventana, estirarse o sentarse en silencio.", "Enfóquese en descansar la vista y calmar su mente."], imagen: "descanso visual.gif" }, ],
+        4: [ { titulo: "Ejercicio 1 - Rompa un papel con intención", descripcion: "Canalice su frustración en una acción física segura.", pasos: ["Tome una hoja y piense en lo que le causa estrés.", "Rompa el papel despacio o de golpe.", "Mientras lo hace, respire profundo y libere esa tensión.", "Repita durante 2-3 minutos si lo necesita."], imagen: "romper-hojas.gif" }, { titulo: "Ejercicio 2 - Técnica del hielo", descripcion: "Enfríe su estrés con un estímulo físico que le devuelva al presente.", pasos: ["Busque un cubito de hielo y tomelo en su mano.", "Sosténgalo durante 30 segundos sin apretar.", "Mientras lo hace, respire lenta y profundamente.", "Fíjese en la sensación fría en tu piel.", "Deje que esa sensación te ancle al momento presente."], imagen: "hielo.gif" }, { titulo: "Ejercicio 3 - Escribir cartas que no enviará", descripcion: "Exprese lo que no puede decir en voz alta.", pasos: ["Tome papel y bolígrafo.", "Escriba una carta a la persona o situación que le causa estrés.", "Exprese todo lo que siente sin censura.", "Cuando termine, puede guardar la carta o destruirla para soltar."], imagen: "cartas.gif" }, { titulo: "Ejercicio 4 - Mindfulness con sonidos", descripcion: "Conecte con el presente enfocándose en los sonidos.", pasos: ["Siéntese cómodamente y cierre los ojos.", "Durante 3 minutos, preste atención a todos los sonidos.", "No intente identificar ni juzgar, solo escúchelos.", "Si su mente se distrae, vuelva tranquilamente a concentrarse en escuchar."], imagen: "mind.gif" }, { titulo: "Ejercicio 5 - Cambio de entorno inmediato", descripcion: "Cambie de espacio para darle un reinicio a su mente.", pasos: ["Salga de donde está y vaya a otro espacio.", "Quédese allí durante 5 minutos.", "Observe con atención y detecte 3 cosas que no había notado.", "Respire profundo 3 veces.", "Regrese solo si se siente más tranquilo."], imagen: "cambio-de-lugar.gif" }, ],
+        5: [ { titulo: "Ejercicio 1 - Respiración Calmante Profunda", descripcion: "Disminuir el estrés elevado y recuperar el control emocional con una respiración pausada y prolongada.", pasos: ["Siéntese cómodo y cierre los ojos.", "Inhale por la nariz contando hasta 4.", "Mantenga el aire contando hasta 7.", "Exhale lentamente por la boca contando hasta 8.", "Repita el ciclo 4 veces.", "Abra los ojos lentamente al terminar."], imagen: "eyes.gif" }, { titulo: "Ejercicio 2 - Observar una vela", descripcion: "Calme su mente enfocándose en un punto de luz.", pasos: ["Encienda una vela (con seguridad) o abra un video de una llama en internet.", "Mire la llama fijamente durante 1 o 2 minutos.", "Deje que su respiración se sincronice con el movimiento del fuego."], imagen: "vela-gif-candelabro.gif" }, { titulo: "Ejercicio 3 - Caminar en línea recta", descripcion: "Libere tensión física mientras enfoca su atención.", pasos: ["Camine despacio en línea recta, 5 pasos hacia adelante y 5 hacia atrás.", "Concéntrese en el contacto de sus pies con el suelo.", "Repita frases como: 'Estoy aquí', 'Estoy en control'."], imagen: "caminarrecto.gif" }, { titulo: "Ejercicio 4 - Contar hacia atrás", descripcion: "Calme su mente combinando conteo y acción física.", pasos: ["Póngase de pie o siéntese derecho.", "Cuente hacia atrás de 10 a 0 en voz baja.", "Mientras cuenta, dé golpecitos suaves en sus piernas.", "Repítalo varias veces hasta sentirse más calmado."], imagen: "atrás.gif" }, { titulo: "Ejercicio 5 - Objeto de seguridad", descripcion: "Enfóquese en un objeto que le transmita calma.", pasos: ["Tome un objeto que le dé seguridad (una almohada, un oso de peluche, etc).", "Sosténgalo con ambas manos y sienta su textura y temperatura.", "Mientras lo observa, respire lentamente y repita: 'Estoy aquí, estoy a salvo'."], imagen: "teddy-bear.gif" }, ]
+    };
+
+    let nivelSeleccionado = null;
+    let indiceEjercicioActual = 0;
+    let ejerciciosFavoritos = [];
+    let sesionesCompletadas = 0;
+    let usuarioLogueado = false;
+    const logros = [ { umbral: 1, nombre: "Punto de Partida", icono: "🌱", desbloqueado: false }, { umbral: 3, nombre: "En racha", icono: "🥉", desbloqueado: false }, { umbral: 5, nombre: "Mente Enfocada", icono: "🥈", desbloqueado: false }, { umbral: 10, nombre: "Nivel Pro", icono: "🥇", desbloqueado: false }, ];
+    const frases = [ "La paz viene de adentro. No la busque afuera.", "El único momento en el que realmente tiene poder es el ahora.", "Respirar es el superpoder más grande que tiene.", "Cuide de usted mismo como si fuera la persona más importante del mundo.", "Un pequeño progreso cada día suma grandes resultados." ];
+    
+    let indicePreguntaActual = 0;
+    let puntajeEncuesta = 0;
+    const preguntasEncuesta = [
+        { pregunta: "¿Cómo calificaría la calidad de su sueño últimamente?", opciones: [ { texto: "Excelente, duermo profundamente.", puntos: 1 }, { texto: "Normal, con algunos altibajos.", puntos: 2 }, { texto: "Mal, me cuesta dormir o me despierto mucho.", puntos: 3 } ] },
+        { pregunta: "En la última semana, ¿con qué frecuencia se ha sentido abrumado/a por sus responsabilidades?", opciones: [ { texto: "Casi nunca.", puntos: 1 }, { texto: "A veces.", puntos: 2 }, { texto: "Casi todo el tiempo.", puntos: 3 } ] },
+        { pregunta: "¿Siente que tiene suficiente energía para sus actividades diarias?", opciones: [ { texto: "Sí, generalmente tengo mucha energía.", puntos: 1 }, { texto: "A veces me siento cansado/a.", puntos: 2 }, { texto: "No, casi siempre me siento agotado/a.", puntos: 3 } ] },
+        { pregunta: "¿Cómo maneja los imprevistos o los cambios de planes?", opciones: [ { texto: "Con calma, me adapto fácilmente.", puntos: 1 }, { texto: "Me generan algo de ansiedad, pero lo manejo.", puntos: 2 }, { texto: "Me frustran y me cuesta mucho adaptarme.", puntos: 3 } ] },
+        { pregunta: "Cuando piensa en sus preocupaciones, ¿cómo se siente?", opciones: [ { texto: "Tengo control sobre ellas.", puntos: 1 }, { texto: "A veces siento que son demasiadas.", puntos: 2 }, { texto: "Siento que me controlan a mí.", puntos: 3 } ] }
+    ];
+
+    function ir(pantallaId) {
+        const header = document.getElementById('header-principal');
+        const encuestaBtn = document.querySelector('.boton-encuesta');
+        const navBotones = document.querySelector('.header-botones-container');
+        
+        if (pantallaId === '1') {
+            usuarioLogueado = false;
+        }
+        
+        header.style.display = (pantallaId === '1' || pantallaId === '11' || pantallaId === '3') ? 'none' : 'flex';
+        
+        encuestaBtn.style.display = usuarioLogueado ? 'flex' : 'none';
+        navBotones.style.display = usuarioLogueado ? 'flex' : 'none';
+
+        document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+        document.getElementById('pantalla' + pantallaId).classList.add('activa');
+        window.scrollTo(0, 0); 
+    }
+    
+    // --- INICIO: FUNCIONES DE VALIDACIÓN MODIFICADAS ---
+    function validarLogin() { 
+        const correo = document.getElementById('nuevoCorreo');
+        const clave = document.getElementById('nuevaClave');
+        const errorCorreo = document.getElementById('errorNuevoCorreo');
+        const errorClave = document.getElementById('errorNuevaClave');
+        let esValido = true;
+
+        // Validar correo
+        if (correo.value.trim() === '') {
+            errorCorreo.style.display = 'block';
+            esValido = false;
+        } else {
+            errorCorreo.style.display = 'none';
+        }
+
+        // Validar clave
+        if (clave.value.trim() === '') {
+            errorClave.style.display = 'block';
+            esValido = false;
+        } else {
+            errorClave.style.display = 'none';
+        }
+
+        // Si todo es válido, continuar
+        if (esValido) {
+            usuarioLogueado = true;
+            ir('4'); 
+        }
+    }
+    function validarRegistro() { 
+        const correo = document.getElementById('correo');
+        const clave = document.getElementById('clave');
+        const errorCorreo = document.getElementById('errorCorreo');
+        const errorClave = document.getElementById('errorClave');
+        let esValido = true;
+
+        // Validar correo
+        if (correo.value.trim() === '') {
+            errorCorreo.style.display = 'block';
+            esValido = false;
+        } else {
+            errorCorreo.style.display = 'none';
+        }
+
+        // Validar clave
+        if (clave.value.trim() === '') {
+            errorClave.style.display = 'block';
+            esValido = false;
+        } else {
+            errorClave.style.display = 'none';
+        }
+        
+        // Si todo es válido, continuar
+        if (esValido) {
+            usuarioLogueado = true;
+            ir('4'); 
+        }
+    }
+    // --- FIN: FUNCIONES DE VALIDACIÓN MODIFICADAS ---
+    
+    function seleccionarNivel(nivel) {
+        nivelSeleccionado = nivel;
+        indiceEjercicioActual = 0;
+        accederAEjercicios();
+    }
+    
+    function mostrarEjercicio(indice) {
+      if (nivelSeleccionado === null) return;
+      const ejercicio = ejerciciosPorNivel[nivelSeleccionado][indice];
+      document.getElementById('tituloEjercicio').textContent = ejercicio.titulo;
+      document.getElementById('descripcionEjercicio').textContent = ejercicio.descripcion;
+      const ul = document.getElementById('listaEjercicio');
+      ul.innerHTML = "";
+      ejercicio.pasos.forEach(paso => { ul.appendChild(Object.assign(document.createElement('li'), { textContent: paso })); });
+      document.getElementById('imagenEjercicio').src = ejercicio.imagen;
+      actualizarBarraProgreso(indice + 1);
+      actualizarBotonFavorito();
+      document.getElementById('botonSiguiente').textContent = (indice === ejerciciosPorNivel[nivelSeleccionado].length - 1) ? "Terminar" : "Siguiente";
+    }
+
+    function actualizarBarraProgreso(indice) {
+      const totalEjercicios = ejerciciosPorNivel[nivelSeleccionado]?.length || 5;
+      const porcentaje = (indice / totalEjercicios) * 100;
+      document.querySelector("#pantalla5 .barra-progreso-inner").style.width = porcentaje + "%";
+    }
+     
+    function siguienteEjercicio() {
+      indiceEjercicioActual++;
+      if (indiceEjercicioActual >= ejerciciosPorNivel[nivelSeleccionado].length) {
+        sesionesCompletadas++; 
+        ir('10'); 
+      } else {
+        mostrarEjercicio(indiceEjercicioActual);
+      }
+    }
+
+    function anteriorEjercicio() {
+      if (indiceEjercicioActual > 0) {
+        indiceEjercicioActual--;
+        mostrarEjercicio(indiceEjercicioActual);
+      } else {
+        ir('4'); 
+      }
+    }
+
+    function mostrarInformacion() {
+        ir('12');
+    }
+    
+    function iniciarEncuesta() {
+        indicePreguntaActual = 0;
+        puntajeEncuesta = 0;
+        ir('Encuesta');
+        mostrarPregunta(indicePreguntaActual);
+    }
+    
+    function mostrarPregunta(indice) {
+        const preguntaActual = preguntasEncuesta[indice];
+        document.getElementById('preguntaEncuesta').textContent = preguntaActual.pregunta;
+        const opcionesContainer = document.getElementById('encuestaOpciones');
+        opcionesContainer.innerHTML = '';
+        preguntaActual.opciones.forEach(opcion => {
+            const botonOpcion = Object.assign(document.createElement('button'), { textContent: opcion.texto, className: 'boton encuesta-opcion-btn', onclick: () => responderPregunta(opcion.puntos) });
+            opcionesContainer.appendChild(botonOpcion);
+        });
+    }
+    
+    function responderPregunta(puntos) {
+        puntajeEncuesta += puntos;
+        indicePreguntaActual++;
+        if (indicePreguntaActual < preguntasEncuesta.length) {
+            mostrarPregunta(indicePreguntaActual);
+        } else {
+            let nivelCalculado = 1;
+            if (puntajeEncuesta >= 14) nivelCalculado = 5;
+            else if (puntajeEncuesta >= 12) nivelCalculado = 4;
+            else if (puntajeEncuesta >= 9) nivelCalculado = 3;
+            else if (puntajeEncuesta >= 7) nivelCalculado = 2;
+            else nivelCalculado = 1;
+
+            nivelSeleccionado = nivelCalculado;
+            indiceEjercicioActual = 0;
+            
+            const nombresNiveles = { 1: "Muy Relajado", 2: "Tranquilo", 3: "Neutral", 4: "Estresado", 5: "Muy Estresado" };
+            document.getElementById('mensajeRecomendacion').textContent = `Según sus respuestas, su estado actual es '${nombresNiveles[nivelCalculado]}'. Le recomendamos los ejercicios del Nivel ${nivelCalculado} para ayudarle.`;
+            ir('Recomendacion');
+        }
+    }
+
+    function accederAEjercicios() {
+        mostrarEjercicio(indiceEjercicioActual);
+        ir('5');
+    }
+    
+    function verEspacioPersonal() {
+        document.getElementById('sesionesContador').textContent = sesionesCompletadas;
+        const contenedorLogros = document.getElementById('listaLogros');
+        contenedorLogros.innerHTML = ''; 
+        logros.forEach(logro => {
+            logro.desbloqueado = sesionesCompletadas >= logro.umbral;
+            const divLogro = Object.assign(document.createElement('div'), { className: 'logro-item' + (logro.desbloqueado ? '' : ' bloqueado') });
+            divLogro.innerHTML = `<span class="logro-icono">${logro.desbloqueado ? logro.icono : '🔒'}</span><span class="logro-nombre">${logro.nombre}</span>`;
+            contenedorLogros.appendChild(divLogro);
+        });
+        document.getElementById('fraseMotivacional').textContent = `"${frases[Math.floor(Math.random() * frases.length)]}"`;
+        ir('Personal');
+    }
+    
+    function mostrarNotificacion(mensaje) {
+        const notificacionDiv = document.getElementById('notificacionFavoritos');
+        notificacionDiv.textContent = mensaje;
+        notificacionDiv.style.visibility = 'visible';
+        notificacionDiv.style.opacity = '1';
+        setTimeout(() => {
+            notificacionDiv.style.visibility = 'hidden';
+            notificacionDiv.style.opacity = '0';
+        }, 3000);
+    }
+    
+    function actualizarBotonFavorito() {
+        if (!nivelSeleccionado) return;
+        const ejercicioActual = ejerciciosPorNivel[nivelSeleccionado][indiceEjercicioActual];
+        const btnFavorito = document.getElementById('botonFavorito');
+        const esFavorito = ejerciciosFavoritos.some(fav => fav.titulo === ejercicioActual.titulo);
+        btnFavorito.textContent = esFavorito ? "Quitar de Favoritos ⭐" : "Añadir a Favoritos";
+        btnFavorito.style.backgroundColor = esFavorito ? "#ffc107" : "#007BFF";
+    }
+
+    function toggleFavorito() {
+        const ejercicioActual = ejerciciosPorNivel[nivelSeleccionado][indiceEjercicioActual];
+        const indiceFavorito = ejerciciosFavoritos.findIndex(fav => fav.titulo === ejercicioActual.titulo);
+        if (indiceFavorito > -1) { 
+            ejerciciosFavoritos.splice(indiceFavorito, 1);
+        } else {
+            if (ejerciciosFavoritos.length >= 3) {
+                mostrarNotificacion("Límite de 3 favoritos alcanzado.");
+                return;
+            }
+            ejerciciosFavoritos.push(ejercicioActual);
+        }
+        actualizarBotonFavorito();
+    }
+
+    function verFavoritos() {
+        const container = document.getElementById('listaFavoritosContainer');
+        container.innerHTML = '';
+        document.getElementById('mensajeSinFavoritos').style.display = (ejerciciosFavoritos.length === 0) ? 'block' : 'none';
+        ejerciciosFavoritos.forEach(ejercicio => {
+            const favDiv = Object.assign(document.createElement('div'), { className: 'favorito-item' });
+            favDiv.innerHTML = `<h4>${ejercicio.titulo}</h4><p>${ejercicio.descripcion}</p><div class="favorito-botones"><button onclick="eliminarFavorito('${ejercicio.titulo}')" class="boton-eliminar-fav">Eliminar</button><button onclick="realizarEjercicioFavorito('${ejercicio.titulo}')">Realizar</button></div>`;
+            container.appendChild(favDiv);
+        });
+        ir('Favoritos');
+    }
+
+    function eliminarFavorito(titulo) {
+        ejerciciosFavoritos = ejerciciosFavoritos.filter(fav => fav.titulo !== titulo);
+        verFavoritos(); 
+    }
+
+    function realizarEjercicioFavorito(titulo) {
+        for (const nivel in ejerciciosPorNivel) {
+            const indice = ejerciciosPorNivel[nivel].findIndex(ej => ej.titulo === titulo);
+            if (indice > -1) {
+                nivelSeleccionado = parseInt(nivel);
+                indiceEjercicioActual = 0;
+                accederAEjercicios();
+                return;
+            }
+        }
+    }
+  </script>
+
+</body>
+</html>
